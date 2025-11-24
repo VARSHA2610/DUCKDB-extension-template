@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-# Set extension name here
+# Keep the internal target name as 'quack' (what DuckDB template expects)
 set(TARGET_NAME quack)
 
 # DuckDB's extension distribution supports vcpkg. As such, dependencies can be added in ./vcpkg.json and then
@@ -12,12 +12,22 @@ set(EXTENSION_NAME ${TARGET_NAME}_extension)
 set(LOADABLE_EXTENSION_NAME ${TARGET_NAME}_loadable_extension)
 
 project(${TARGET_NAME})
+
+# Include extension's headers
 include_directories(src/include)
 
-set(EXTENSION_SOURCES src/quack_extension.cpp)
+# Include DuckDB source headers
+include_directories(${CMAKE_SOURCE_DIR}/duckdb/src/include)
+include_directories(${CMAKE_SOURCE_DIR}/duckdb/src)
+
+# Our two source files: loader + metrics
+set(EXTENSION_SOURCES
+    src/quack_extension.cpp
+    src/llm_metrics_extension.cpp
+)
 
 build_static_extension(${TARGET_NAME} ${EXTENSION_SOURCES})
-build_loadable_extension(${TARGET_NAME} " " ${EXTENSION_SOURCES})
+build_loadable_extension(${TARGET_NAME} "llmevaluation" ${EXTENSION_SOURCES})
 
 # Link OpenSSL in both the static library as the loadable extension
 target_link_libraries(${EXTENSION_NAME} OpenSSL::SSL OpenSSL::Crypto)

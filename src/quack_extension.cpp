@@ -6,42 +6,24 @@
 #include "duckdb/function/scalar_function.hpp"
 #include <duckdb/parser/parsed_data/create_scalar_function_info.hpp>
 
-// OpenSSL linked through vcpkg
-#include <openssl/opensslv.h>
-
 namespace duckdb {
 
-inline void QuackScalarFun(DataChunk &args, ExpressionState &state, Vector &result) {
-	auto &name_vector = args.data[0];
-	UnaryExecutor::Execute<string_t, string_t>(name_vector, result, args.size(), [&](string_t name) {
-		return StringVector::AddString(result, "Quack " + name.GetString() + " 🐥");
-	});
-}
+// Forward declaration – implemented in llm_metrics_extension.cpp
+void RegisterLLMFunctions(ExtensionLoader &loader);
 
-inline void QuackOpenSSLVersionScalarFun(DataChunk &args, ExpressionState &state, Vector &result) {
-	auto &name_vector = args.data[0];
-	UnaryExecutor::Execute<string_t, string_t>(name_vector, result, args.size(), [&](string_t name) {
-		return StringVector::AddString(result, "Quack " + name.GetString() + ", my linked OpenSSL version is " +
-		                                           OPENSSL_VERSION_TEXT);
-	});
-}
-
+// Internal loader that registers all LLMevaluation functions
 static void LoadInternal(ExtensionLoader &loader) {
-	// Register a scalar function
-	auto quack_scalar_function = ScalarFunction("quack", {LogicalType::VARCHAR}, LogicalType::VARCHAR, QuackScalarFun);
-	loader.RegisterFunction(quack_scalar_function);
-
-	// Register another scalar function
-	auto quack_openssl_version_scalar_function = ScalarFunction("quack_openssl_version", {LogicalType::VARCHAR},
-	                                                            LogicalType::VARCHAR, QuackOpenSSLVersionScalarFun);
-	loader.RegisterFunction(quack_openssl_version_scalar_function);
+	// Register your LLM evaluation functions (exact_match, compute_metrics, etc.)
+	RegisterLLMFunctions(loader);
 }
 
 void QuackExtension::Load(ExtensionLoader &loader) {
 	LoadInternal(loader);
 }
+
 std::string QuackExtension::Name() {
-	return "quack";
+	// This is the name used in SQL:  LOAD 'llmevaluation';
+	return "llmevaluation";
 }
 
 std::string QuackExtension::Version() const {
@@ -56,7 +38,10 @@ std::string QuackExtension::Version() const {
 
 extern "C" {
 
-DUCKDB_CPP_EXTENSION_ENTRY(quack, loader) {
+// Entry point for the DuckDB C++ extension
+DUCKDB_CPP_EXTENSION_ENTRY(quack, loader)
+ {
 	duckdb::LoadInternal(loader);
 }
+
 }
