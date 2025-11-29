@@ -2,23 +2,23 @@
 
 Metrics used:
 
-exact match
-f1
-precesion
-distance
-nli
-semantics
+-exact match
+-f1
+-precision
+-distance
+-nli
+-semantics
 
 
 select llmevaluate(gold,response) from openairesponse;
 action:
-1. reads the value row by row and use those 2 values in the metrics
-2. Store each metrics value to the row;
+1. reads the value row by row and uses those 2 values in the metrics
+2. Store each metric's value in the row;
 
 returns :
 
-1. returns the whole table with all the metrics value 
+1. returns the whole table with all the metric values 
 
-Analytics :
+
 
 
